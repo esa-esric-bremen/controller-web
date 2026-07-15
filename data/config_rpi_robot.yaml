@@ -1,0 +1,272 @@
+command_address_port: 7005
+telemetry_address_port: 7006
+ip_address: srcrpirobot
+sim_ip_address: client_rpi_robot
+system_name: rpi_robot
+name: Excavation on Coyote 3
+
+visualizations: 
+  # Vizualization plugin to show Coyote3 in its excavator configuration
+  - coyote_excavator
+
+actions:
+  - name: BLDC 1 - Bucket excavator
+    command: excavator_speed
+    driver: gpio
+    mode: pwm
+    pwm_range: 2000
+    pin: 12
+    range: [100, 200]
+    deadzones: [[144, 149], [151, 156]]
+    start: 150
+    step: 1
+    # user interface configuration
+    ui_range: [132, 150]
+    keys_pos: ['d']
+    keys_neg: ['a']
+    buttons_pos: [3]
+    buttons_neg: [0]
+    value_stop: true
+  
+  - name: BLDC 2 - Screw
+    command: screw_speed
+    driver: gpio
+    mode: pwm
+    pwm_range: 2000
+    pin: 13
+    range: [100, 200]
+    deadzones: [[141, 149], [151, 159]]
+    start: 150
+    step: 1
+    # user interface configuration
+    ui_range: [132, 150]
+    keys_pos: ['j']
+    keys_neg: ['k']
+    buttons_pos: [14]
+    buttons_neg: [15]
+    value_stop: true
+    # 250ms ramp up time
+    ramp_ms: 250
+    counter: 'screw_runs'
+  
+  - name: Excavation LED
+    command: led_1
+    driver: gpio
+    mode: "soft_pwm"
+    pwm_range: 100
+    pin: 6
+    range: [0, 100]
+    ui_range: [0, 40]
+    start: 0
+    step: 1
+    keys_pos: ['m']
+    keys_neg: ['n']
+    value_stop: true
+
+  - name: L298N - linear actuators
+    command: "linear_motor_1"
+    driver: "motor"
+    control: "duration" # or position
+    start: 0
+    range: [-40000, 60000]
+    # ui_range: [-3000, 17000]
+    step: 250
+    pins:
+      en: 17
+      in1: 22
+      in2: 23
+    mode: 'gpio'
+    keys_pos: ['s']
+    keys_neg: ['w']
+    buttons_pos: [13]
+    buttons_neg: [12]
+    value_stop: false
+
+sensors:
+  - name: Scale
+    id: scale
+    mask: 1
+    driver: hx711
+    fixed: 2
+    pins:
+      dt: 26
+      sck: 16
+    # Value measured without anything on the scale
+    zero_value: 8686458
+    # something we measured for calibration (in gram, e.g. 1000 for a 1 liter water bottle)
+    known_weight: 1450
+    # measured value with added weight
+    weight_value: 8728530
+    # requency per second
+    frequency: 1
+    # calibrate in the beginning
+    calibrate: true
+    # time in seconds we take to calibrate
+    calibrate_time: 5
+    # time in seconds we wait before we start calibrating
+    start_calibrate_time: 2
+    unit: g
+    show_diff: true
+    max_okay: 6000.0
+    min_okay: -24.0
+    graph:
+      id: scale
+      color: green
+      dims: [-100, 5000]
+
+  - name: Current
+    id: current
+    mask: 2
+    channel:
+      reading: ampere
+      number: 0
+      # to get the amps we have to subtract 2.5 from our reading and then...
+      offset: -2.5
+      # ...multipy by 1/0.072
+      multiply: 13.888888888
+    driver: ads1x15
+    variant: ads1115
+    # I2C address - 0x48
+    address: 72
+    frequency: 1
+    # we want to read watt, for that we need ampere and voltage
+    reading: current
+    fixed: 2
+    unit: A
+    max_okay: 3.0
+    min_okay: 0.0
+    graph:
+      id: current
+      color: yellow
+      dims: [0, 10]
+    
+  - name: Voltage
+    id: voltage
+    mask: 4
+    channel:
+      number: 3
+      reading: voltage
+      offset: 0.0
+      multiply: 6.124
+    driver: ads1x15
+    variant: ads1115
+    # I2C address - 0x48
+    reading: voltage
+    address: 72
+    frequency: 1
+    fixed: 2
+    max_okay: 50.5
+    # absolute minimum 3.3 volt = 39.6V
+    min_okay: 42.0
+    unit: V
+    graph:
+      id: voltage
+      color: salmon
+      dims: [0, 50]
+    
+  - name: CPU Temp.
+    id: cpu_temp
+    mask: 8
+    driver: cpu_temp
+    filename: /sys/class/thermal/thermal_zone0/temp
+    scale: 0.001
+    max_okay: 80.0
+    min_okay: 20.0
+    # requency per second
+    frequency: 1
+    fixed: 2
+    unit: °C
+    graph:
+      id: cpu_temp
+      color: orange
+      dims: [0, 100]
+  
+  - name: Throttle
+    id: cpu_throttle
+    mask: 16
+    # gets throttled value from vcgencmd, see https://www.raspberrypi.com/documentation/computers/os.html#vcgencmd on how to parse it, send as the 32 bit integer
+    driver: vcgencmd
+    # requency per second
+    frequency: 1
+    max_okay: 0.0
+    min_okay: 0.0
+
+tasks:
+  - name: auto_screw
+    buttons: []
+    keys: ['1']
+    steps:
+      # Step 3: we excavated 3000 gram, its time to run the scrow for 2s
+      - id: 0
+        condition:
+          type: SENSOR_DIFF
+          sensor_id: scale
+          op: GREATER_THAN
+          value: 1000
+        actions:
+          - type: DURATION
+            value: 136
+            command: screw_speed
+            duration_ms: 8000
+            counter: 'screw_runs'
+            reset_counter: 'scale'
+          - type: LOOP
+
+  - name: screw_once
+    buttons: []
+    keys: ['2']
+    steps:
+      - id: 0
+        condition:
+          type: IMMEDIATE
+        actions:
+          - type: DURATION
+            value: 136
+            command: screw_speed
+            duration_ms: 8000
+            counter: 'screw_runs'
+
+  - name: excav_start
+    buttons: []
+    keys: ['3']
+    desc: Run linear actuators for 5 seconds and start excavation.
+    steps:
+      # Step 1: runs linear actuators for 5 seconds.
+      - id: 0
+        condition:
+          type: IMMEDIATE
+        actions:
+          - type: ADD_VALUE
+            command: linear_motor_1
+            value: 5000  # the motor driver should set the motor to 7000
+      # Step 2: Start excavator
+      - id: 1
+        condition:
+          type: TIME_ELAPSED_FROM_START
+          duration_ms: 5000
+        actions:
+          - type: START_TASK
+            task: auto_excav
+
+  - name: auto_excav
+    buttons: []
+    keys: ['4']
+    em_off: true
+    steps:
+      - id: 1
+        condition:
+          type: IMMEDIATE
+        actions:
+          - type: SET_VALUE
+            command: excavator_speed
+            value: 136
+      # go down additional 250 every 5 seconds
+      - id: 2
+        condition:
+          type: TIME_ELAPSED_FROM_START
+          duration_ms: 3000
+        actions:
+          - type: ADD_VALUE
+            command: linear_motor_1
+            value: 250
+          - type: LOOP

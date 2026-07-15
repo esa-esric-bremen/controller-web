@@ -1,0 +1,12 @@
+services:
+  controller_dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    working_dir: /app
+    volumes:
+      - ./src:/app/controller/src:rw
+      - ./CMakeLists.txt:/app/controller/CMakeLists.txt:rw
+      - ./README.md:/app/controller/README.md:rw
+      - ./rebuild.bash:/app/controller/rebuild.bash
+    network_mode: host

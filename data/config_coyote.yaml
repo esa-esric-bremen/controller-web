@@ -1,0 +1,28 @@
+command_address_port: 7001
+telemetry_address_port: 7002
+ip_address: coyote3
+sim_ip_address: client_coyote_sim
+system_name: coyote
+name: Coyote 3 Robot
+
+actions:
+  - name: LEDs
+    command: setLEDs
+    driver: rrc
+    range: [0, 100]
+    start: 0
+    step: 1
+    # user interface configuration
+    ui_range: [0, 100]
+    keys_neg: ['x']
+    keys_pos: ['c']
+    buttons_pos: [7]
+    buttons_neg: [6]
+    value_stop: true
+    reset: false
+
+twist:
+  - name: gamepad_1
+    command: gamepad_linear
+    axis: 0
+    driver: gamepad
