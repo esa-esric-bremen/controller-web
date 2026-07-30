@@ -5,9 +5,17 @@ This Robot Remote controller/web bridge was developed at the [Robotics Innovatio
 
 See https://github.com/esa-esric-bremen/.github/ for more details, including a system overview.
 
-<img src="https://avatars.githubusercontent.com/u/277213809?s=400&u=25dd27e12b5732cb78306bf27b43139214900f58" style="width:200px;">
-
-[![Pioneers of Sustainable Lunar Missions: Team BREMEN Wins the International Space Resources Challenge](https://img.youtube.com/vi/bCoAqg_29Lo/0.jpg)](https://www.youtube.com/watch?v=bCoAqg_29Lo)
+<table style="border: 0px;">
+    <tr><td>
+        <img src="https://avatars.githubusercontent.com/u/277213809?s=400&u=25dd27e12b5732cb78306bf27b43139214900f58" style="width:300px;">
+    </td><td>
+        <a href="https://www.youtube.com/watch?v=bCoAqg_29Lo" alt="Pioneers of Sustainable Lunar Missions: Team BREMEN Wins the International Space Resources Challenge"><img src="https://img.youtube.com/vi/bCoAqg_29Lo/0.jpg"></a>
+    </td></tr>
+    <tr>
+        <td>Team Logo</td>
+        <td>Youtube Video: Pioneers of Sustainable Lunar Missions: Team BREMEN Wins the International Space Resources Challenge</td>
+    </tr>
+</table>
 
 ## Motivation
 This is code for the **winning** team B.R.E.M.E.N. of the [ESA ESRIC Space Resource Challenge](https://src.esa.int) as reference implementation for [Robot Remote Control](https://github.com/dfki-ric/robot_remote_control) and general information for the public.
