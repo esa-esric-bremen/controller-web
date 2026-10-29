@@ -1,0 +1,21 @@
+diff --git a/src/Transports/WebSocket/TransportWebSocket.cpp b/src/Transports/WebSocket/TransportWebSocket.cpp
+index 86f071a..3e192c7 100644
+--- a/src/Transports/WebSocket/TransportWebSocket.cpp
++++ b/src/Transports/WebSocket/TransportWebSocket.cpp
+@@ -46,8 +46,14 @@ TransportWebSocket::TransportWebSocket(const ConnectionType &type, const int &po
+         // server->set_close_handler(std::bind(&TransportWebSocket::on_server_close, this, std::placeholders::_1));
+         // server->set_message_handler(std::bind(&TransportWebSocket::on_server_message, this, std::placeholders::_1, std::placeholders::_2));
+ 
+-        thread.reset(new websocketpp::lib::thread([this, port](){
+-            this->getServer()->listen(port);
++        thread.reset(new websocketpp::lib::thread([this, port, addr](){
++            if (addr.empty()) {
++                // websocketpp default: IPv6 (dual stack where the host allows it)
++                this->getServer()->listen(port);
++            } else {
++                // e.g. "0.0.0.0" to listen on all IPv4 interfaces
++                this->getServer()->listen(addr, std::to_string(port));
++            }
+             // Queues a connection accept operation
+             this->getServer()->start_accept();
+             // Start the Asio io_service run loop
