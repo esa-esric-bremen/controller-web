@@ -80,6 +80,9 @@ An easy alternative is to use the devcontroller:
 
 Simply open this folder in VS Code and build&run the devcontainer.
 
+## AI usage
+Claude Opus 5.5 has been used to create the new logging/recording system and integration of the code with RRCs websocket communication.
+
 ## License
 BSD-3
 
