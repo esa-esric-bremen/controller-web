@@ -12,6 +12,9 @@ visualizations:
   # Vizualization plugin to show Coyote3 in its excavator configuration
   - coyote_excavator
 
+olimexino:
+  device: /dev/ttyACM0
+
 actions:
   - name: BLDC 1 - Bucket excavator
     command: excavator_speed
@@ -84,6 +87,34 @@ actions:
     buttons_pos: [13]
     buttons_neg: [12]
     value_stop: false
+
+  # --- motors on the OLIMEXINO (CAN) ---
+  - name: AK80-6 drive
+    command: ak80_speed
+    driver: olimexino_ak80
+    icon: belt_drv
+    # electrical rpm (ERPM), firmware limit +/-100000
+    range: [-30000, 30000]
+    ui_range: [0, 20000]
+    start: 0
+    step: 1000
+    keys_neg: ['y']
+    keys_pos: ['x']
+
+  - name: TA70 angle
+    command: ta70_angle
+    driver: olimexino_ta70
+    icon: linear_motor_1
+    # reducer output in degrees, firmware limit 0..45
+    range: [0, 45]
+    start: 0
+    step: 1
+    # motor-side rpm of a move, profile acceleration, current limit
+    speed_rpm: 300
+    accel_rpm_s: 500
+    current_ma: 3000
+    keys_neg: ['g']
+    keys_pos: ['t']
 
 # overview screen of the UI: sensors that count the excavated material and the energy
 overview:
@@ -201,6 +232,71 @@ sensors:
     frequency: 1
     max_okay: 0.0
     min_okay: 0.0
+
+  # --- OLIMEXINO telemetry (channel: name in the firmware's plotter line) ---
+  - name: Motor controller
+    id: olimexino_link
+    driver: olimexino
+    channel: link
+    mask: 32
+    frequency: 2
+    min_okay: 1
+
+  - name: AK80 speed
+    id: ak80_erpm
+    driver: olimexino
+    channel: AK_ActualERPM
+    mask: 64
+    frequency: 2
+    unit: ERPM
+    graph:
+      id: ak80_erpm
+      color: lightblue
+      dims: [0, 20000]
+
+  - name: AK80 current
+    id: ak80_current
+    driver: olimexino
+    channel: AK_CurrentA
+    mask: 128
+    frequency: 2
+    unit: A
+    fixed: 2
+    max_okay: 15
+    graph:
+      id: ak80_current
+      color: gold
+      dims: [0, 10]
+
+  - name: AK80 temp.
+    id: ak80_temp
+    driver: olimexino
+    channel: AK_TemperatureC
+    mask: 256
+    frequency: 1
+    unit: °C
+    max_okay: 70
+
+  - name: TA70 angle
+    id: ta70_angle
+    driver: olimexino
+    channel: TA_ActualDeg
+    mask: 512
+    frequency: 2
+    unit: °
+    fixed: 1
+    graph:
+      id: ta70_angle
+      color: plum
+      dims: [0, 45]
+
+  # 1 locked, 0 released, -1 unknown (tracked by the firmware, no brake sensor)
+  - name: TA70 brake
+    id: ta70_brake
+    driver: olimexino
+    channel: TA_BrakeLocked
+    mask: 1024
+    frequency: 1
 
 tasks:
   - name: auto_screw

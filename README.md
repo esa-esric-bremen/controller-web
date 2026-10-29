@@ -75,6 +75,8 @@ $ ./controller_web data/config_rpi_robot.yaml data/config_coyote.yaml
 ### Dependencies
 Robot-Remote-Control depends on libzmq and protobuf, its web transports on libwebsocketpp and libcpprest. Both have to be installed *before* building Robot-Remote-Control, otherwise the transports are silently skipped (CMake of this project then stops with an error).
 
+All servers listen on IPv4. Robot-Remote-Control's websocket server ignores its listen address and always uses IPv6, `patches/robot_remote_control` fixes that until it is merged upstream. The Dockerfile applies it to the current master; when building by hand run `git apply <path>/patches/robot_remote_control/*.patch` in the robot_remote_control checkout before `cmake`. If master changes so the patch no longer applies, the docker build fails at that step.
+
 ### Dev Container
 An easy alternative is to use the devcontroller:
 
