@@ -1,5 +1,8 @@
 command_address_port: 7005
 telemetry_address_port: 7006
+# browser access via robot_remote_control (http commands, websocket telemetry)
+web_command_port: 8001
+web_telemetry_port: 8002
 ip_address: srcrpirobot
 sim_ip_address: client_rpi_robot
 system_name: rpi_robot
@@ -81,6 +84,14 @@ actions:
     buttons_pos: [13]
     buttons_neg: [12]
     value_stop: false
+
+# overview screen of the UI: sensors that count the excavated material and the energy
+overview:
+  weight_sensor: scale
+  # changes smaller than this are measurement noise (vibration), not material
+  weight_noise_g: 100
+  voltage_sensor: voltage
+  current_sensor: current
 
 sensors:
   - name: Scale

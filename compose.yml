@@ -9,4 +9,6 @@ services:
       - ./CMakeLists.txt:/app/controller/CMakeLists.txt:rw
       - ./README.md:/app/controller/README.md:rw
       - ./rebuild.bash:/app/controller/rebuild.bash
+      - ./data:/app/controller/data:rw
+      - ./recordings:/app/controller/recordings:rw
     network_mode: host

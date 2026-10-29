@@ -5,28 +5,33 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(yaml-cpp REQUIRED)
+find_package(robot_remote_control REQUIRED)
 
-find_package(Boost 1.74.0 REQUIRED COMPONENTS system thread)
-find_package(nlohmann_json 3.2.0 REQUIRED)
-include_directories(${Boost_INCLUDE_DIRS})
+# robot_remote_control builds these transports only if websocketpp / cpprestsdk were found
+foreach(target
+        robot_remote_control-transport_ws
+        robot_remote_control-transport_http)
+    if(NOT TARGET ${target})
+        message(FATAL_ERROR "${target} not found: rebuild robot_remote_control with "
+                            "libwebsocketpp-dev and libcpprest-dev installed")
+    endif()
+endforeach()
 
-add_executable(controller_web 
+add_executable(controller_web
     src/main.cpp
-    src/remote_robot_controller.cpp
-     src/remote_robot_manager.cpp
-    src/shared_state.cpp
-    src/websocket_session.cpp
-    src/websocket_server.cpp)
+    src/robot_relay.cpp
+    src/sensor_decoder.cpp
+    src/system_config.cpp
+    src/telemetry_recorder.cpp)
 
 target_link_libraries(controller_web
     PRIVATE
     robot_remote_control-robot_controller
+    robot_remote_control-controlled_robot
     robot_remote_control-types
     robot_remote_control-update_thread
     robot_remote_control-transport_zmq
-    protobuf
+    robot_remote_control-transport_ws
+    robot_remote_control-transport_http
     yaml-cpp
-    Boost::system
-    Boost::thread
-    nlohmann_json::nlohmann_json
 )

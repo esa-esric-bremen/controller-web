@@ -1,4 +1,4 @@
-# Robot Remoter Control Controller
+# Robot Remoter Control Web-Controller
 C++ WebSocket Server and Robot Remote Control Controller to run on the Control System of the Beneficiation and Excavation systems for the ESA ESRIC Space Resource Challenge
 
 See https://github.com/esa-esric-bremen/.github/ for a system overview.
@@ -30,7 +30,10 @@ $ sudo apt-get install -y --no-install-recommends \
     gettext-base \
     fakeroot \
     libboost-all-dev \
-    libyaml-cpp-dev
+    libyaml-cpp-dev \
+    libwebsocketpp-dev \
+    libcpprest-dev \
+    libssl-dev
 $ sudo mkdir -p /app/controller/thirdparty
 $ sudo mkdir -p /app/controller/src/
 $ sudo chown $USER:$GROUP -R /app/controller/
@@ -55,11 +58,12 @@ $ mkdir build \
 You can start the web server and robot remote controller using the command
 
 ```bash
-$ /app/controller/controller_web
+$ cd /app/controller
+$ ./controller_web data/config_rpi_robot.yaml data/config_coyote.yaml
 ```
 
 ### Dependencies
-Robot-Remote-Control depends on libzmq and protobuf.
+Robot-Remote-Control depends on libzmq and protobuf, its web transports on libwebsocketpp and libcpprest. Both have to be installed *before* building Robot-Remote-Control, otherwise the transports are silently skipped (CMake of this project then stops with an error).
 
 ### Dev Container
 An easy alternative is to use the devcontroller:

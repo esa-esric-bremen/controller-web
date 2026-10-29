@@ -1,14 +1,17 @@
 import asyncio
+import json
+import sys
+
 import websockets
 
 
-async def test_websocket(uri):
+async def main(uri):
     async with websockets.connect(uri) as websocket:
         while True:
-            response = await websocket.recv()
-            print(f"Received message: {response}")
+            message = json.loads(await websocket.recv())
+            print(message["type"], message.get("channel", 0), json.loads(message["json"]))
 
 
 if __name__ == "__main__":
-    websocket_url = "ws://localhost:8000"
-    asyncio.run(test_websocket(websocket_url))
+    port = sys.argv[1] if len(sys.argv) > 1 else "8002"
+    asyncio.run(main(f"ws://127.0.0.1:{port}"))
