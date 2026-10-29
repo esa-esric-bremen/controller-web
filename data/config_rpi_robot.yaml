@@ -43,8 +43,8 @@ actions:
     step: 1
     # user interface configuration
     ui_range: [132, 150]
-    keys_pos: ['j']
-    keys_neg: ['k']
+    keys_pos: ['f']
+    keys_neg: ['g']
     buttons_pos: [14]
     buttons_neg: [15]
     value_stop: true
